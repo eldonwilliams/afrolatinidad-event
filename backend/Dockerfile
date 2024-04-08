@@ -1,0 +1,36 @@
+FROM node:18.17.1 AS deps
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+FROM node:18.17.1
+
+ENV PORT=3030
+
+WORKDIR /app
+
+COPY . .
+
+RUN npm install -g typescript
+RUN npm install -g ts-node
+RUN npm install -g nodemon
+
+COPY --from=deps /app /app
+
+ARG WATCH=false
+ENV WATCH=$WATCH
+
+ARG MONGO_ROOT_PASSWORD
+ARG MONGO_ROOT_PASSWORD_FILE
+ARG ADMIN_PASSWORD=1234
+ARG PRESENTER_PASSWORD=4321
+
+ENV MONGO_ROOT_PASSWORD=$MONGO_ROOT_PASSWORD
+ENV MONGO_ROOT_PASSWORD_FILE=$MONGO_ROOT_PASSWORD_FILE
+ENV ADMIN_PASSWORD=$ADMIN_PASSWORD
+ENV PRESENTER_PASSWORD=$PRESENTER_PASSWORD
+
+CMD if [ "$WATCH" = "true" ]; then npm run watch; else npm run start; fi

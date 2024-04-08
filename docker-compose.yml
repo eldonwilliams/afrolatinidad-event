@@ -1,0 +1,56 @@
+version: '3.7'
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - frontend_build:/usr/frontend
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - urlnet
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - WATCH=true
+    volumes:
+      - frontend_build:/app/dist
+    networks:
+      - urlnet
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+      - MONGO_ROOT_PASSWORD_FILE=/run/secrets/mongo_root_password
+    secrets:
+      - mongo_root_password
+    networks:
+      - urlnet
+  mongo:
+    image: mongo
+    networks:
+      - urlnet
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_root_password
+    secrets:
+      - mongo_root_password
+  
+secrets:
+  mongo_root_password:
+    file: ./secrets/mongo_root_password.txt
+    
+networks:
+  urlnet:
+
+volumes:
+  frontend_build:
