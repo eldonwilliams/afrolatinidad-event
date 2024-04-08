@@ -1,0 +1,1 @@
+``mongo_root_password.txt`` - this is the password for the root/admin account of the mongodb.

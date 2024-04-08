@@ -1,0 +1,56 @@
+version: '3.7'
+
+services:
+  frontend:
+    build:
+      args:
+        - WATCH=true
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - .git/
+        - action: rebuild
+          path: ./frontend/package.json
+  backend:
+    build:
+      args:
+        - WATCH=true
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - node_modules/
+            - .git/
+        - action: rebuild
+          path: ./backend/package.json
+  web:
+    build:
+      args:
+        - PORTS=80 443 8797 8081
+    ports:
+      - 80:80
+      - 443:443
+      - 8797:8797
+      - 8081:8081
+    develop:
+      watch:
+        - action: rebuild
+          path: ./web/Caddyfile
+  mongo-express:
+    image: mongo-express
+    environment:
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD:-admin}
+      - ME_CONFIG_MONGODB_URL=mongodb://root:${MONGO_ROOT_PASSWORD}@mongo:27017
+    env_file:
+      - .env
+    secrets:
+      - mongo_root_password
+    networks:
+      - urlnet
