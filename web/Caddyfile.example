@@ -1,0 +1,12 @@
+http://localhost:80 {
+	root * /usr/frontend
+	file_server
+}
+
+http://localhost:8797 {
+	reverse_proxy backend:3030
+}
+
+http://localhost:8081 {
+	reverse_proxy mongo-express:8081
+}
